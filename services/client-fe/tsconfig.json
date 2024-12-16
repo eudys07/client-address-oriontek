@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "jsx": "react-jsx",
+      "baseUrl": "src",             // Set the base URL for imports
+      "paths": {
+        "*": ["*", "*.tsx", "*.ts"] // Allow imports without specifying file extensions
+      }
+    }
+  }
+  

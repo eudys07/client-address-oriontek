@@ -1,0 +1,91 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: clientreport_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres:/docker-entrypoint-initdb.d
+
+  mongodb:
+    image: mongo:5
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./infra/mongodb:/data/db
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  clientreport:
+    build: 
+      context: ./services/clientreport
+    container_name: clientreport
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=clientreport_db
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - kafka
+
+  address-api:
+    build:
+      context: ./services/address-api
+    container_name: address-api
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/db
+
+  client-api:
+    build:
+      context: ./services/client-api
+    container_name: client-api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/reports_db
+
+  client-fe:
+    build:
+      context: ./services/client-fe
+    container_name: client-fe
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_CLIENT_API_URL: http://localhost:3001
+      REACT_APP_ADDRESS_API_URL: http://localhost:3002
+    depends_on:
+      - client-api
+      - address-api
