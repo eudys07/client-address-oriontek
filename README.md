@@ -33,10 +33,10 @@ client-address-oriontek/
 
   This will build and start all the containers:
 
-  React Frontend (client-app)\
+  React Frontend (client-fe)\
   Client API (client-api) – Node.js with SQLite\
   Address API (address-api) – Node.js with MongoDB\
-  Report API (report-api) – Python Django\
+  Report API (clientrepot) – Python Django\
   The services will be available at the following URLs:
   
   React Frontend: http://localhost:3000 \
