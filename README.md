@@ -29,7 +29,7 @@ client-address-oriontek/
 #### 3. Run the Application
   To build and start all the services, run the following command in the project root:
 
-  docker-compose up --build
+  ## docker-compose up --build
 
   This will build and start all the containers:
 
